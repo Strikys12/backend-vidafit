@@ -50,6 +50,7 @@ public class PedidoService {
                 .toList();
     }
 
+
     @Transactional(readOnly = true)
     public Optional<PedidoResponseDTO> buscarPorId(Long id) {
         return pedidoRepository.findById(id)
