@@ -59,6 +59,7 @@ public class ProductoService {
         p.setStock(datos.getStock());
         p.setCategoriaId(datos.getCategoriaId());
 
+
         Producto creado = productoRepository.save(p);
         return mapearAProductoResponseDTO(creado);
     }
