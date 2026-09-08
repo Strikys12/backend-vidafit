@@ -56,6 +56,17 @@ public class PedidoService {
                 .map(this::mapearAPedidoResponseDTO);
     }
 
+    @Transactional(readOnly = true)
+    public List<PedidoResponseDTO> listarPedidosPorUsuario(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new IllegalArgumentException("Usuario no existe");
+        }
+        return pedidoRepository.findByUsuarioId(usuarioId)
+                .stream()
+                .map(this::mapearAPedidoResponseDTO)
+                .toList();
+    }
+
     @Transactional
     public PedidoResponseDTO crearPedido(PedidoRequestDTO datos) {
 
