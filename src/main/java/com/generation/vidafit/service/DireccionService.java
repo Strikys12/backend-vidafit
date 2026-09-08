@@ -87,7 +87,7 @@ public class DireccionService {
     private DireccionResponseDTO mapearADireccionResponseDTO(Direccion d) {
         return new DireccionResponseDTO(
                 d.getId(),
-                d.getUserId(),
+                d.getUsuario().getId(),
                 d.getDireccionExacta(),
                 d.getBarrio(),
                 d.getComuna(),
