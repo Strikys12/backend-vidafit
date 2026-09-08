@@ -48,7 +48,7 @@ public class ProductoService {
         if (!categoriaRepository.existsById(categoriaId)) {
             throw new IllegalArgumentException("Categoría no existe");
         }
-        return productoRepository.findByCategoriaId(categoriaId)
+        return productoRepository.findByCategoria_CategoriaId(categoriaId)
                 .stream()
                 .map(this::mapearAProductoResponseDTO)
                 .toList();
@@ -171,7 +171,7 @@ public class ProductoService {
 
     private ProductoResponseDTO mapearAProductoResponseDTO(Producto p) {
 
-        Long categoriaId = (p.getCategoria() != null) ? p.getCategoria().getId() : null;
+        Long categoriaId = (p.getCategoria() != null) ? p.getCategoria().getCategoriaId() : null;
 
         return new ProductoResponseDTO(
                 p.getId(),
