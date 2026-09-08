@@ -1,4 +1,7 @@
 package com.generation.vidafit.repository;
 
-public interface DireccionRepository {
+import com.generation.vidafit.model.Direccion;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DireccionRepository extends JpaRepository<Direccion, Long> {
 }
