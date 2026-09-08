@@ -61,27 +61,25 @@ public class DetallePedidoService {
     public DetallePedidoResponseDTO crearDetalle(DetallePedidoRequestDTO datos) {
 
         if (datos.getCantidad() <= 0) {
-            throw new IllegalArgumentException(
-                    "La cantidad debe ser mayor que cero"
-            );
+            throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
         }
 
-        if (!pedidoRepository.existsById(datos.getPedidoId())) {
-            throw new IllegalArgumentException("Pedido no existe");
-        }
+        // 1. PRIMERO buscas y declaras la variable 'pedido'
+        Pedido pedido = pedidoRepository.findById(datos.getPedidoId())
+                .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado"));
 
+        // 2. PRIMERO buscas y declaras la variable 'producto'
         Producto producto = productoRepository.findById(datos.getProductoId())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Producto no existe"));
+                .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado"));
 
         if (producto.getStock() < datos.getCantidad()) {
             throw new IllegalStateException("Stock insuficiente");
         }
 
+        // 3. AHORA SÍ instancias y usas las variables declaradas arriba
         DetallePedido detalle = new DetallePedido();
-
-        detalle.setPedidoId(datos.getPedidoId());
-        detalle.setProductoId(datos.getProductoId());
+        detalle.setPedido(pedido);
+        detalle.setProducto(producto);
         detalle.setCantidad(datos.getCantidad());
         detalle.setPrecioUnitario(producto.getPrecio());
 
@@ -92,7 +90,6 @@ public class DetallePedidoService {
 
         return mapearADetallePedidoResponseDTO(creado);
     }
-
     @Transactional
     public Optional<DetallePedidoResponseDTO> actualizarDetalle(
             Long id,
@@ -107,13 +104,9 @@ public class DetallePedidoService {
                         );
                     }
 
-                    Producto producto = productoRepository.findById(
-                                    detalle.getProductoId()
-                            )
+                    Producto producto = productoRepository.findById(datos.getProductoId())
                             .orElseThrow(() ->
-                                    new IllegalArgumentException(
-                                            "Producto no existe"
-                                    ));
+                                    new IllegalArgumentException("Producto no encontrado"));
 
                     int diferencia = datos.getCantidad()
                             - detalle.getCantidad();
@@ -147,8 +140,7 @@ public class DetallePedidoService {
     @Transactional
     public boolean eliminarDetalle(Long id) {
 
-        Optional<DetallePedido> detalleOptional =
-                detallePedidoRepository.findById(id);
+        Optional<DetallePedido> detalleOptional = detallePedidoRepository.findById(id);
 
         if (detalleOptional.isEmpty()) {
             return false;
@@ -156,14 +148,13 @@ public class DetallePedidoService {
 
         DetallePedido detalle = detalleOptional.get();
 
-        Producto producto = productoRepository.findById(
-                detalle.getProductoId()
-        ).orElse(null);
+
+        Producto producto = detalle.getProducto();
 
         if (producto != null) {
-            producto.setStock(
-                    producto.getStock() + detalle.getCantidad()
-            );
+
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+
 
             productoRepository.save(producto);
         }
@@ -172,13 +163,15 @@ public class DetallePedidoService {
         return true;
     }
 
-    private DetallePedidoResponseDTO mapearADetallePedidoResponseDTO(
-            DetallePedido detalle) {
+    private DetallePedidoResponseDTO mapearADetallePedidoResponseDTO(DetallePedido detalle) {
+
+        Long pedidoId = (detalle.getPedido() != null) ? detalle.getPedido().getId() : null;
+        Long productoId = (detalle.getProducto() != null) ? detalle.getProducto().getId() : null;
 
         return new DetallePedidoResponseDTO(
                 detalle.getId(),
-                detalle.getPedidoId(),
-                detalle.getProductoId(),
+                pedidoId,
+                productoId,
                 detalle.getCantidad(),
                 detalle.getPrecioUnitario()
         );
