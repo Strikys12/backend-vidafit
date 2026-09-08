@@ -3,6 +3,7 @@ package com.generation.vidafit.service;
 import com.generation.vidafit.dto.DireccionRequestDTO;
 import com.generation.vidafit.dto.DireccionResponseDTO;
 import com.generation.vidafit.model.Direccion;
+import com.generation.vidafit.model.Usuario;
 import com.generation.vidafit.repository.DireccionRepository;
 import com.generation.vidafit.repository.UsuarioRepository;
 import com.generation.vidafit.repository.PedidoRepository;
@@ -43,12 +44,11 @@ public class DireccionService {
 
     @Transactional
     public DireccionResponseDTO crearDireccion(DireccionRequestDTO datos) {
-        if (!usuarioRepository.existsById(datos.getUserId())) {
-            throw new IllegalArgumentException("Usuario no existe");
-        }
+        Usuario usuario = usuarioRepository.findById(datos.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
 
         Direccion d = new Direccion();
-        d.setUserId(datos.getUserId());
+        d.setUsuario(usuario);
         d.setDireccionExacta(datos.getDireccionExacta());
         d.setBarrio(datos.getBarrio());
         d.setComuna(datos.getComuna());
@@ -73,6 +73,7 @@ public class DireccionService {
                 });
     }
 
+    @Transactional
     public boolean eliminarDireccion(Long id) {
         if (!direccionRepository.existsById(id)) {
             return false;
@@ -85,9 +86,11 @@ public class DireccionService {
     }
 
     private DireccionResponseDTO mapearADireccionResponseDTO(Direccion d) {
+        Long usuarioId = (d.getUsuario() != null) ? d.getUsuario().getId() : null;
+
         return new DireccionResponseDTO(
                 d.getId(),
-                d.getUsuario().getId(),
+                usuarioId,
                 d.getDireccionExacta(),
                 d.getBarrio(),
                 d.getComuna(),

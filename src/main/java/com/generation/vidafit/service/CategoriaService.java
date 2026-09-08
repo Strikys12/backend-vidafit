@@ -63,7 +63,7 @@ public class CategoriaService {
             return false;
         }
 
-        if(productoRepository.existsByCategoriaId(id)){
+        if(productoRepository.existsByCategoria_CategoriaId(id)){
             throw new IllegalStateException("No se puede eliminar la categoría porque hay productos asociados a ella.");
         }
 
@@ -75,7 +75,7 @@ public class CategoriaService {
 
     private CategoriaResponseDTO mapearACategoriaResponseDTO(Categoria c) {
         return new CategoriaResponseDTO(
-                c.getId(),
+                c.getCategoriaId(),
                 c.getNombre(),
                 c.getDescripcion()
         );

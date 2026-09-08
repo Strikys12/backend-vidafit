@@ -4,15 +4,13 @@ import com.generation.vidafit.dto.DetallePedidoRequestDTO;
 import com.generation.vidafit.dto.DetallePedidoResponseDTO;
 import com.generation.vidafit.dto.PedidoRequestDTO;
 import com.generation.vidafit.dto.PedidoResponseDTO;
-import com.generation.vidafit.model.DetallePedido;
-import com.generation.vidafit.model.Pedido;
-import com.generation.vidafit.model.Producto;
-import com.generation.vidafit.model.Direccion;
+import com.generation.vidafit.model.*;
+import com.generation.vidafit.model.EstadoPedido;
 import com.generation.vidafit.repository.DetallePedidoRepository;
+import com.generation.vidafit.repository.DireccionRepository;
 import com.generation.vidafit.repository.PedidoRepository;
 import com.generation.vidafit.repository.ProductoRepository;
 import com.generation.vidafit.repository.UsuarioRepository;
-import com.generation.vidafit.repository.DireccionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,32 +68,29 @@ public class PedidoService {
     @Transactional
     public PedidoResponseDTO crearPedido(PedidoRequestDTO datos) {
 
-        if (datos.getUsuarioId() == null ||
-                !usuarioRepository.existsById(datos.getUsuarioId())) {
+        if (datos.getUsuarioId() == null) {
             throw new IllegalArgumentException("Usuario no existe");
         }
 
-        Direccion direccion = direccionRepository.findById(datos.getDireccionId())
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Dirección no existe"));
+        Usuario usuario = usuarioRepository.findById(datos.getUsuarioId())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no existe"));
 
-        if (!direccion.getUserId().equals(datos.getUsuarioId())) {
-            throw new IllegalArgumentException(
-                    "La dirección no pertenece al usuario"
-            );
+        Direccion direccion = direccionRepository.findById(datos.getDireccionId())
+                .orElseThrow(() -> new IllegalArgumentException("Dirección no existe"));
+
+        if (direccion.getUsuario() == null || !direccion.getUsuario().getId().equals(datos.getUsuarioId())) {
+            throw new IllegalArgumentException("La dirección no pertenece al usuario");
         }
 
         if (datos.getDetalles() == null || datos.getDetalles().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "El pedido debe tener al menos un producto"
-            );
+            throw new IllegalArgumentException("El pedido debe tener al menos un producto");
         }
 
         Pedido pedido = new Pedido();
-        pedido.setUsuarioId(datos.getUsuarioId());
-        pedido.setDireccionId(datos.getDireccionId());
+        pedido.setUsuario(usuario);
+        pedido.setDireccion(direccion);
         pedido.setFechaPedido(LocalDateTime.now());
-        pedido.setEstado("CREADO");
+        pedido.setEstado(EstadoPedido.valueOf("CREADO"));
         pedido.setTotal(BigDecimal.ZERO);
 
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
@@ -105,45 +100,28 @@ public class PedidoService {
         for (DetallePedidoRequestDTO detReq : datos.getDetalles()) {
 
             if (detReq.getCantidad() <= 0) {
-                throw new IllegalArgumentException(
-                        "La cantidad debe ser mayor que cero"
-                );
+                throw new IllegalArgumentException("La cantidad debe ser mayor que cero");
             }
 
             Producto producto = productoRepository.findById(detReq.getProductoId())
-                    .orElseThrow(() ->
-                            new IllegalArgumentException(
-                                    "Producto no encontrado: "
-                                            + detReq.getProductoId()
-                            ));
+                    .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + detReq.getProductoId()));
 
             if (producto.getStock() < detReq.getCantidad()) {
-                throw new IllegalStateException(
-                        "Stock insuficiente para producto: "
-                                + detReq.getProductoId()
-                );
+                throw new IllegalStateException("Stock insuficiente para producto: " + detReq.getProductoId());
             }
 
             DetallePedido detalle = new DetallePedido();
-
-            detalle.setPedidoId(pedidoGuardado.getId());
-            detalle.setProductoId(producto.getId());
+            detalle.setPedido(pedidoGuardado);
+            detalle.setProducto(producto);
             detalle.setCantidad(detReq.getCantidad());
             detalle.setPrecioUnitario(producto.getPrecio());
 
             detallePedidoRepository.save(detalle);
 
-            producto.setStock(
-                    producto.getStock() - detReq.getCantidad()
-            );
-
+            producto.setStock(producto.getStock() - detReq.getCantidad());
             productoRepository.save(producto);
 
-            BigDecimal subtotal = producto.getPrecio()
-                    .multiply(
-                            BigDecimal.valueOf(detReq.getCantidad())
-                    );
-
+            BigDecimal subtotal = producto.getPrecio().multiply(BigDecimal.valueOf(detReq.getCantidad()));
             total = total.add(subtotal);
         }
 
@@ -154,35 +132,26 @@ public class PedidoService {
     }
 
     @Transactional
-    public Optional<PedidoResponseDTO> actualizarPedido(
-            Long id,
-            PedidoRequestDTO datos) {
+    public Optional<PedidoResponseDTO> actualizarPedido(Long id, PedidoRequestDTO datos) {
 
         return pedidoRepository.findById(id)
                 .map(pedido -> {
 
                     if (datos.getDireccionId() != null) {
 
-                        Direccion direccion = direccionRepository
-                                .findById(datos.getDireccionId())
-                                .orElseThrow(() ->
-                                        new IllegalArgumentException(
-                                                "Dirección no existe"
-                                        ));
+                        Direccion direccion = direccionRepository.findById(datos.getDireccionId())
+                                .orElseThrow(() -> new IllegalArgumentException("Dirección no existe"));
 
-                        if (!direccion.getUserId()
-                                .equals(pedido.getUsuarioId())) {
+                        if (pedido.getUsuario() == null || direccion.getUsuario() == null ||
+                                !direccion.getUsuario().getId().equals(pedido.getUsuario().getId())) {
 
-                            throw new IllegalArgumentException(
-                                    "La nueva dirección no pertenece al usuario"
-                            );
+                            throw new IllegalArgumentException("La nueva dirección no pertenece al usuario");
                         }
 
-                        pedido.setDireccionId(datos.getDireccionId());
+                        pedido.setDireccion(direccion);
                     }
 
-                    if (datos.getEstado() != null &&
-                            !datos.getEstado().isBlank()) {
+                    if (datos.getEstado() != null && !datos.getEstado().isBlank()) {
 
                         String estado = datos.getEstado().toUpperCase();
 
@@ -192,12 +161,10 @@ public class PedidoService {
                                 !estado.equals("ENTREGADO") &&
                                 !estado.equals("CANCELADO")) {
 
-                            throw new IllegalArgumentException(
-                                    "Estado de pedido inválido"
-                            );
+                            throw new IllegalArgumentException("Estado de pedido inválido");
                         }
 
-                        pedido.setEstado(estado);
+                        pedido.setEstado(EstadoPedido.valueOf(estado));
                     }
 
                     Pedido actualizado = pedidoRepository.save(pedido);
@@ -214,9 +181,7 @@ public class PedidoService {
         }
 
         if (detallePedidoRepository.existsByPedidoId(id)) {
-            throw new IllegalStateException(
-                    "No se puede eliminar el pedido porque tiene detalles asociados"
-            );
+            throw new IllegalStateException("No se puede eliminar el pedido porque tiene detalles asociados");
         }
 
         pedidoRepository.deleteById(id);
@@ -225,24 +190,32 @@ public class PedidoService {
 
     private PedidoResponseDTO mapearAPedidoResponseDTO(Pedido p) {
 
-        List<DetallePedidoResponseDTO> detalles =
-                detallePedidoRepository.findByPedidoId(p.getId())
-                        .stream()
-                        .map(d -> new DetallePedidoResponseDTO(
-                                d.getId(),
-                                d.getPedidoId(),
-                                d.getProductoId(),
-                                d.getCantidad(),
-                                d.getPrecioUnitario()
-                        ))
-                        .toList();
+        List<DetallePedidoResponseDTO> detalles = detallePedidoRepository.findByPedidoId(p.getId())
+                .stream()
+                .map(d -> {
+                    Long pedidoId = (d.getPedido() != null) ? d.getPedido().getId() : null;
+                    Long productoId = (d.getProducto() != null) ? d.getProducto().getId() : null;
+
+                    return new DetallePedidoResponseDTO(
+                            d.getId(),
+                            pedidoId,
+                            productoId,
+                            d.getCantidad(),
+                            d.getPrecioUnitario()
+                    );
+                })
+                .toList();
+
+        Long usuarioId = (p.getUsuario() != null) ? p.getUsuario().getId() : null;
+        Long direccionId = (p.getDireccion() != null) ? p.getDireccion().getId() : null;
+        String estadoStr = (p.getEstado() != null) ? p.getEstado().name() : null;
 
         return new PedidoResponseDTO(
                 p.getId(),
-                p.getUsuarioId(),
-                p.getDireccionId(),
+                usuarioId,
+                direccionId,
                 p.getFechaPedido(),
-                p.getEstado(),
+                estadoStr,
                 p.getTotal(),
                 detalles
         );
