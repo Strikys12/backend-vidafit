@@ -1,4 +1,7 @@
 package com.generation.vidafit.repository;
 
-public interface ProductoRepository {
+import com.generation.vidafit.model.Producto;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface ProductoRepository extends JpaRepository<Producto, Long> {
 }
