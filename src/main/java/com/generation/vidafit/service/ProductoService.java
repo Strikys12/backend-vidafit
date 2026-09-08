@@ -40,6 +40,17 @@ public class ProductoService {
                 .map(this::mapearAProductoResponseDTO);
     }
 
+    @Transactional(readOnly = true)
+    public List<ProductoResponseDTO> listarProductosPorCategoria(Long categoriaId) {
+        if (!categoriaRepository.existsById(categoriaId)) {
+            throw new IllegalArgumentException("Categoría no existe");
+        }
+        return productoRepository.findByCategoriaId(categoriaId)
+                .stream()
+                .map(this::mapearAProductoResponseDTO)
+                .toList();
+    }
+
     @Transactional
     public ProductoResponseDTO crearProducto(ProductoRequestDTO datos) {
 
