@@ -42,6 +42,14 @@ public class DireccionService {
                 .map(this::mapearADireccionResponseDTO);
     }
 
+    @Transactional(readOnly = true)
+    public List<DireccionResponseDTO> obtenerDireccionesPorUsuario(Long usuarioId) {
+        return direccionRepository.findByUsuarioId(usuarioId)
+                .stream()
+                .map(this::mapearADireccionResponseDTO)
+                .toList();
+    }
+
     @Transactional
     public DireccionResponseDTO crearDireccion(DireccionRequestDTO datos) {
         Usuario usuario = usuarioRepository.findById(datos.getUserId())

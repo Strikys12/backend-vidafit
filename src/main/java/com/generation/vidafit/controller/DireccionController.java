@@ -34,6 +34,12 @@ public class DireccionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<DireccionResponseDTO>> obtenerDireccionesPorUsuario(@PathVariable Long usuarioId) {
+        List<DireccionResponseDTO> direcciones = direccionService.obtenerDireccionesPorUsuario(usuarioId);
+        return ResponseEntity.ok(direcciones);
+    }
+
     @PostMapping
     public ResponseEntity<DireccionResponseDTO> crearDireccion(@RequestBody DireccionRequestDTO datos) {
         DireccionResponseDTO creada = direccionService.crearDireccion(datos);
