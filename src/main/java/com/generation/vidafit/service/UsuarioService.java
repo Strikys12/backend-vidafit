@@ -3,6 +3,7 @@ package com.generation.vidafit.service;
 import com.generation.vidafit.dto.LoginDTO;
 import com.generation.vidafit.dto.UsuarioRequestDTO;
 import com.generation.vidafit.dto.UsuarioResponseDTO;
+import com.generation.vidafit.model.Rol;
 import com.generation.vidafit.model.Usuario;
 import com.generation.vidafit.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,9 @@ public class UsuarioService {
         usuario.setNombre(datos.getNombre());
         usuario.setEmail(datos.getCorreo());
         usuario.setPasswordHash(datos.getContrasena());
+
+        // Todo usuario registrado desde el formulario siempre será CLIENTE
+        usuario.setRol(Rol.CLIENTE);
 
         Usuario guardado = usuarioRepository.save(usuario);
         return mapearAUsuarioResponseDTO(guardado);
@@ -103,15 +107,15 @@ public class UsuarioService {
             return null;
         }
 
-        // Se obtiene el nombre del Enum Rol si no es nulo
+        // Si usuario.getRol() es null, se asigna CLIENTE por defecto en el DTO
         List<String> roles = (usuario.getRol() != null)
                 ? List.of(usuario.getRol().name())
-                : List.of();
+                : List.of(Rol.CLIENTE.name());
 
         return new UsuarioResponseDTO(
                 usuario.getId(),
-                usuario.getNombre(),
-                usuario.getEmail(),
+                usuario.getNombre() != null ? usuario.getNombre() : "",
+                usuario.getEmail() != null ? usuario.getEmail() : "",
                 roles
         );
     }
