@@ -1,5 +1,6 @@
 package com.generation.vidafit.service;
 
+import com.generation.vidafit.dto.LoginDTO;
 import com.generation.vidafit.dto.UsuarioRequestDTO;
 import com.generation.vidafit.dto.UsuarioResponseDTO;
 import com.generation.vidafit.model.Usuario;
@@ -50,6 +51,17 @@ public class UsuarioService {
 
         Usuario guardado = usuarioRepository.save(usuario);
         return mapearAUsuarioResponseDTO(guardado);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<UsuarioResponseDTO> autenticar(LoginDTO datos) {
+        if (datos == null || datos.getCorreo() == null || datos.getContrasena() == null) {
+            return Optional.empty();
+        }
+
+        return usuarioRepository.findByEmail(datos.getCorreo())
+                .filter(usuario -> java.util.Objects.equals(usuario.getPasswordHash(), datos.getContrasena()))
+                .map(this::mapearAUsuarioResponseDTO);
     }
 
     @Transactional

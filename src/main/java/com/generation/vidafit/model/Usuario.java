@@ -21,8 +21,11 @@ public class Usuario {
     private String nombre;
     private String email;
 
+
     @Column(name = "password_hash")
     private String passwordHash;
+
+
 
     @Enumerated(EnumType.STRING)
     private Rol rol;
@@ -32,4 +35,5 @@ public class Usuario {
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY)
     private List<Pedido> pedidos;
+
 }
