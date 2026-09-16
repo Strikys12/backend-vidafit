@@ -14,8 +14,11 @@ import java.math.BigDecimal;
 public class ProductoResponseDTO {
 
     private Long id;
+    private String imagen;
     private String nombre;
     private BigDecimal precio;
+    private String descripcion;
     private Integer stock;
     private Long categoriaId;
+
 }

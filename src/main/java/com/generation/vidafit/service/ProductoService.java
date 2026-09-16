@@ -61,6 +61,14 @@ public class ProductoService {
             throw new IllegalArgumentException("El nombre del producto es obligatorio");
         }
 
+        if (datos.getImagen() == null || datos.getImagen().isBlank()) {
+            throw new IllegalArgumentException("La imagen del producto es obligatoria");
+        }
+
+        if (datos.getDescripcion() == null || datos.getDescripcion().isBlank()){
+            throw new IllegalArgumentException("La descripción del producto es obligatoria");
+        }
+
         if (datos.getPrecio() == null || datos.getPrecio().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Precio inválido");
         }
@@ -77,10 +85,13 @@ public class ProductoService {
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no existe"));
 
         Producto p = new Producto();
+        p.setImagen(datos.getImagen());
         p.setNombre(datos.getNombre());
         p.setPrecio(datos.getPrecio());
+        p.setDescripcion(datos.getDescripcion());
         p.setStock(datos.getStock());
         p.setCategoria(categoria);
+
 
         Producto creado = productoRepository.save(p);
         return mapearAProductoResponseDTO(creado);
@@ -94,6 +105,14 @@ public class ProductoService {
 
                     if (datos.getNombre() != null && !datos.getNombre().isBlank()) {
                         producto.setNombre(datos.getNombre());
+                    }
+
+                    if (datos.getImagen() != null && !datos.getImagen().isBlank()) {
+                        producto.setImagen(datos.getImagen());
+                    }
+
+                    if (datos.getDescripcion() != null && !datos.getDescripcion().isBlank()) {
+                        producto.setDescripcion(datos.getDescripcion());
                     }
 
                     if (datos.getPrecio() != null) {
@@ -175,8 +194,10 @@ public class ProductoService {
 
         return new ProductoResponseDTO(
                 p.getId(),
+                p.getImagen(),
                 p.getNombre(),
                 p.getPrecio(),
+                p.getDescripcion(),
                 p.getStock(),
                 categoriaId
         );

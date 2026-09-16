@@ -1,5 +1,6 @@
 package com.generation.vidafit.controller;
 
+import com.generation.vidafit.dto.LoginDTO;
 import com.generation.vidafit.dto.UsuarioRequestDTO;
 import com.generation.vidafit.dto.UsuarioResponseDTO;
 import com.generation.vidafit.service.UsuarioService;
@@ -36,6 +37,13 @@ public class UsuarioController {
     public ResponseEntity<UsuarioResponseDTO> crearUsuario(@RequestBody UsuarioRequestDTO datos) {
         UsuarioResponseDTO creado = usuarioService.crearUsuario(datos);
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UsuarioResponseDTO> login(@RequestBody LoginDTO datos) {
+        return usuarioService.autenticar(datos)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @PutMapping("/{id}")

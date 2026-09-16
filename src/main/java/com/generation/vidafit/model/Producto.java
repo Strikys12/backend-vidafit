@@ -22,6 +22,10 @@ public class Producto {
 
     private String nombre;
 
+    private String descripcion;
+
+    private String imagen;
+
     @Column(name = "precio", precision = 10, scale = 2)
     private BigDecimal precio;
 
