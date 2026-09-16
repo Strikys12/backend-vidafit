@@ -13,8 +13,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class ProductoRequestDTO {
 
+    private String imagen;
     private String nombre;
     private BigDecimal precio;
     private Integer stock;
     private Long categoriaId;
+    private String descripcion;
 }
