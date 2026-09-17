@@ -40,6 +40,11 @@ public class PedidoController {
         return ResponseEntity.ok(pedidoService.listarPedidosPorUsuario(usuarioId));
     }
 
+    @ExceptionHandler({Exception.class})
+    public ResponseEntity<String> manejarCualquierError(Exception ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
     // Crear un pedido completo (junto con sus detalles y descuento de stock)
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> crearPedido(@RequestBody PedidoRequestDTO datos) {

@@ -14,6 +14,9 @@ import com.generation.vidafit.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -69,7 +72,7 @@ public class PedidoService {
     public PedidoResponseDTO crearPedido(PedidoRequestDTO datos) {
 
         if (datos.getUsuarioId() == null) {
-            throw new IllegalArgumentException("Usuario no existe");
+            throw new IllegalArgumentException("El usuarioId es obligatorio");
         }
 
         Usuario usuario = usuarioRepository.findById(datos.getUsuarioId())
@@ -90,7 +93,17 @@ public class PedidoService {
         pedido.setUsuario(usuario);
         pedido.setDireccion(direccion);
         pedido.setFechaPedido(LocalDateTime.now());
-        pedido.setEstado(EstadoPedido.valueOf("CREADO"));
+
+        if (datos.getEstado() != null && !datos.getEstado().isBlank()) {
+            try {
+                pedido.setEstado(EstadoPedido.valueOf(datos.getEstado().toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                pedido.setEstado(EstadoPedido.PENDIENTE);
+            }
+        } else {
+            pedido.setEstado(EstadoPedido.PENDIENTE);
+        }
+
         pedido.setTotal(BigDecimal.ZERO);
 
         Pedido pedidoGuardado = pedidoRepository.save(pedido);
@@ -107,7 +120,7 @@ public class PedidoService {
                     .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + detReq.getProductoId()));
 
             if (producto.getStock() < detReq.getCantidad()) {
-                throw new IllegalStateException("Stock insuficiente para producto: " + detReq.getProductoId());
+                throw new IllegalStateException("Stock insuficiente para el producto: " + detReq.getProductoId());
             }
 
             DetallePedido detalle = new DetallePedido();
@@ -155,16 +168,11 @@ public class PedidoService {
 
                         String estado = datos.getEstado().toUpperCase();
 
-                        if (!estado.equals("CREADO") &&
-                                !estado.equals("CONFIRMADO") &&
-                                !estado.equals("ENVIADO") &&
-                                !estado.equals("ENTREGADO") &&
-                                !estado.equals("CANCELADO")) {
-
+                        try {
+                            pedido.setEstado(EstadoPedido.valueOf(estado));
+                        } catch (IllegalArgumentException e) {
                             throw new IllegalArgumentException("Estado de pedido inválido");
                         }
-
-                        pedido.setEstado(EstadoPedido.valueOf(estado));
                     }
 
                     Pedido actualizado = pedidoRepository.save(pedido);
