@@ -98,10 +98,10 @@ public class PedidoService {
             try {
                 pedido.setEstado(EstadoPedido.valueOf(datos.getEstado().toUpperCase()));
             } catch (IllegalArgumentException e) {
-                pedido.setEstado(EstadoPedido.PENDIENTE);
+                pedido.setEstado(EstadoPedido.CREADO);
             }
         } else {
-            pedido.setEstado(EstadoPedido.PENDIENTE);
+            pedido.setEstado(EstadoPedido.CREADO);
         }
 
         pedido.setTotal(BigDecimal.ZERO);
