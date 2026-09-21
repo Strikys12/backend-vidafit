@@ -203,11 +203,13 @@ public class PedidoService {
                 .map(d -> {
                     Long pedidoId = (d.getPedido() != null) ? d.getPedido().getId() : null;
                     Long productoId = (d.getProducto() != null) ? d.getProducto().getId() : null;
+                    String nombreProducto = (d.getProducto() != null) ? d.getProducto().getNombre() : "Producto sin nombre";
 
                     return new DetallePedidoResponseDTO(
                             d.getId(),
                             pedidoId,
                             productoId,
+                            nombreProducto,
                             d.getCantidad(),
                             d.getPrecioUnitario()
                     );
