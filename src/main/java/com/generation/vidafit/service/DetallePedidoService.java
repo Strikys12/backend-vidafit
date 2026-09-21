@@ -167,11 +167,13 @@ public class DetallePedidoService {
 
         Long pedidoId = (detalle.getPedido() != null) ? detalle.getPedido().getId() : null;
         Long productoId = (detalle.getProducto() != null) ? detalle.getProducto().getId() : null;
+        String nombreProducto = (detalle.getProducto() != null) ? detalle.getProducto().getNombre() : "Producto sin nombre";
 
         return new DetallePedidoResponseDTO(
                 detalle.getId(),
                 pedidoId,
                 productoId,
+                nombreProducto,
                 detalle.getCantidad(),
                 detalle.getPrecioUnitario()
         );
