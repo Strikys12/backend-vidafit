@@ -59,4 +59,9 @@ public class ProductoController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/marcas")
+    public ResponseEntity<List<String>> listarMarcas() {
+        return ResponseEntity.ok(productoService.listarMarcas());
+    }
 }

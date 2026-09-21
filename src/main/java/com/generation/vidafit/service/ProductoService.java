@@ -3,6 +3,7 @@ package com.generation.vidafit.service;
 import com.generation.vidafit.dto.ProductoRequestDTO;
 import com.generation.vidafit.dto.ProductoResponseDTO;
 import com.generation.vidafit.model.Categoria;
+import com.generation.vidafit.model.Marca;
 import com.generation.vidafit.model.Producto;
 import com.generation.vidafit.repository.CategoriaRepository;
 import com.generation.vidafit.repository.DetallePedidoRepository;
@@ -11,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductoService {
@@ -163,6 +166,12 @@ public class ProductoService {
 
         productoRepository.deleteById(id);
         return true;
+    }
+
+    public List<String> listarMarcas() {
+        return Arrays.stream(Marca.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
     }
 
     @Transactional
