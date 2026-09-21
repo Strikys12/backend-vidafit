@@ -81,6 +81,10 @@ public class ProductoService {
             throw new IllegalArgumentException("La categoría es obligatoria");
         }
 
+        if (datos.getMarca() == null) {
+            throw new IllegalArgumentException("La marca es obligatoria");
+        }
+
         Categoria categoria = categoriaRepository.findById(datos.getCategoriaId())
                 .orElseThrow(() -> new IllegalArgumentException("Categoría no existe"));
 
@@ -91,6 +95,7 @@ public class ProductoService {
         p.setDescripcion(datos.getDescripcion());
         p.setStock(datos.getStock());
         p.setCategoria(categoria);
+        p.setMarca(datos.getMarca());
 
 
         Producto creado = productoRepository.save(p);
@@ -113,6 +118,10 @@ public class ProductoService {
 
                     if (datos.getDescripcion() != null && !datos.getDescripcion().isBlank()) {
                         producto.setDescripcion(datos.getDescripcion());
+                    }
+
+                    if (datos.getMarca() != null) { // <--- ACTUALIZACIÓN NUEVA
+                        producto.setMarca(datos.getMarca());
                     }
 
                     if (datos.getPrecio() != null) {
@@ -199,7 +208,9 @@ public class ProductoService {
                 p.getPrecio(),
                 p.getDescripcion(),
                 p.getStock(),
-                categoriaId
+                categoriaId,
+                p.getMarca()
+
         );
     }
 }

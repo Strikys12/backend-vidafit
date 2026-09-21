@@ -31,6 +31,10 @@ public class Producto {
 
     private int stock;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "marca")
+    private Marca marca; //
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;

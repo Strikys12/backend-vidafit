@@ -1,5 +1,6 @@
 package com.generation.vidafit.dto;
 
+import com.generation.vidafit.model.Marca;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,4 +20,5 @@ public class ProductoRequestDTO {
     private Integer stock;
     private Long categoriaId;
     private String descripcion;
+    private Marca marca;
 }
