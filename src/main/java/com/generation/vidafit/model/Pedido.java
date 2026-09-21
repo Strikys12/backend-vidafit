@@ -14,7 +14,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Pedido {
 
     @Id
@@ -40,4 +39,11 @@ public class Pedido {
 
     @Column(name = "total", precision = 10, scale = 2)
     private BigDecimal total;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.fechaPedido == null) {
+            this.fechaPedido = LocalDateTime.now();
+        }
+    }
 }
